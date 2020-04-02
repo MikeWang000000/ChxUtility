@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -59,7 +61,24 @@ public class ChxUtility implements Serializable
 				.connectTimeout(Duration.ofSeconds(3))
 				.build();
 	}
-	
+
+	public static TreePath getPath(TreeNode treeNode) {
+		// Licsber - 2020-04-02
+		List<Object> nodes = new ArrayList<>();
+
+		TreeNode tmp = treeNode;
+		if (tmp != null) {
+			nodes.add(tmp);
+			tmp = tmp.getParent();
+			while (tmp != null) {
+				nodes.add(0, tmp);
+				tmp = tmp.getParent();
+			}
+		}
+
+		return nodes.isEmpty() ? null : new TreePath(nodes.toArray());
+	}
+
 	private static String md5(String context)
 	{
 		try

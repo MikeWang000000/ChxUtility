@@ -33,6 +33,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 public class ChxGUI
@@ -111,7 +112,10 @@ public class ChxGUI
 						else if (component instanceof ChxSectionNode)
 							loadResourceNodes((ChxSectionNode) component);
 						gui.label.setText("就绪。");
-				    }
+            synchronized (ChxGUI.this) {
+                ChxGUI.this.notify();
+            }
+				  }
 				}).start();
 			}
 			@Override
@@ -172,7 +176,57 @@ public class ChxGUI
 				}).start();
 			}
 		});
-		subpanelLeft.add(buttonAdd, BorderLayout.SOUTH);
+    JPanel allPanel = new JPanel();
+    allPanel.add(buttonAdd);
+    JButton allButton = new JButton("全部展开");
+
+    allButton.addActionListener(e -> new Thread(() -> {
+                ChxGUI gui = ChxGUI.this;
+                gui.label.setText("请不要操作 稍等一会");
+                gui.tree.setEnabled(false);
+                synchronized (ChxGUI.this) {
+                    try {
+                        gui.tree.expandRow(0);
+                        Thread.sleep((int) (1000 * Math.random()));
+                        ChxGUI.this.wait();
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
+                TreeNode root = (TreeNode) gui.treeModel.getRoot();
+                for (int i = root.getChildCount() - 1; i >= 0; i--) {
+                    TreeNode course = root.getChildAt(i);
+                    synchronized (ChxGUI.this) {
+                        try {
+                            gui.tree.expandPath(ChxUtility.getPath(course));
+                            Thread.sleep((int) (1000 * Math.random()));
+                            ChxGUI.this.wait();
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    for (int j = course.getChildCount() - 1; j >= 0; j--) {
+                        TreeNode lesson = course.getChildAt(j);
+                        synchronized (ChxGUI.this) {
+                            try {
+                                gui.tree.expandPath(ChxUtility.getPath(lesson));
+                                Thread.sleep((int) (2000 * Math.random()));
+                                ChxGUI.this.wait();
+                            } catch (InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                }
+                gui.tree.setEnabled(true);
+                gui.label.setText("就绪。");
+            }).start()
+    );
+
+    allPanel.add(allButton);
+    subpanelLeft.add(allPanel, BorderLayout.SOUTH);
 		panel.add(subpanelLeft, BorderLayout.WEST);
 		
 		// Right part

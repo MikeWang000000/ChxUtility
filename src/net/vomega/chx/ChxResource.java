@@ -12,6 +12,10 @@ public class ChxResource implements Serializable
 	public String jtoken;
 	public String objectid;
 	public String jobid;
+	public String otherInfo;
+	public String attDurationEnc;
+	public String videoFaceCaptureEnc;
+	public String rt;
 	
 	public ChxAccount account;
 	public ChxCourse course;
